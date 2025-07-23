@@ -1,6 +1,11 @@
-import { relations, sql } from "drizzle-orm";
-import { index, primaryKey, sqliteTableCreator } from "drizzle-orm/sqlite-core";
-import { type AdapterAccount } from "next-auth/adapters";
+import { sql } from "drizzle-orm";
+import {
+  index,
+  integer,
+  sqliteTable,
+  sqliteTableCreator,
+  text,
+} from "drizzle-orm/sqlite-core";
 
 /**
  * This is an example of how to use the multi-project schema feature of Drizzle ORM. Use the same
@@ -12,7 +17,7 @@ export const createTable = sqliteTableCreator(
   (name) => `paper-directory_${name}`,
 );
 
-export const posts = createTable(
+export const post = createTable(
   "post",
   (d) => ({
     id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
@@ -20,7 +25,7 @@ export const posts = createTable(
     createdById: d
       .text({ length: 255 })
       .notNull()
-      .references(() => users.id),
+      .references(() => user.id),
     createdAt: d
       .integer({ mode: "timestamp" })
       .default(sql`(unixepoch())`)
@@ -33,75 +38,97 @@ export const posts = createTable(
   ],
 );
 
-export const users = createTable("user", (d) => ({
-  id: d
-    .text({ length: 255 })
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: d.text({ length: 255 }),
-  email: d.text({ length: 255 }).notNull(),
-  emailVerified: d.integer({ mode: "timestamp" }).default(sql`(unixepoch())`),
-  image: d.text({ length: 255 }),
-}));
-
-export const usersRelations = relations(users, ({ many }) => ({
-  accounts: many(accounts),
-}));
-
-export const accounts = createTable(
-  "account",
+export const paper = createTable(
+  "paper",
   (d) => ({
-    userId: d
+    id: d.integer({ mode: "number" }).primaryKey({ autoIncrement: true }),
+    courseName: d.text({ length: 256 }).notNull(),
+    courseCode: d.text({ length: 50 }).notNull(),
+    professorName: d.text({ length: 256 }).notNull(),
+    semester: d.text({ length: 50 }).notNull(),
+    department: d.text({ length: 100 }).notNull(),
+    paperType: d.text({ length: 20 }).notNull(), // "midterm" or "final"
+    paperPdfUrl: d.text({ length: 500 }).notNull(),
+    createdById: d
       .text({ length: 255 })
       .notNull()
-      .references(() => users.id),
-    type: d.text({ length: 255 }).$type<AdapterAccount["type"]>().notNull(),
-    provider: d.text({ length: 255 }).notNull(),
-    providerAccountId: d.text({ length: 255 }).notNull(),
-    refresh_token: d.text(),
-    access_token: d.text(),
-    expires_at: d.integer(),
-    token_type: d.text({ length: 255 }),
-    scope: d.text({ length: 255 }),
-    id_token: d.text(),
-    session_state: d.text({ length: 255 }),
+      .references(() => user.id),
+    createdAt: d
+      .integer({ mode: "timestamp" })
+      .default(sql`(unixepoch())`)
+      .notNull(),
+    updatedAt: d.integer({ mode: "timestamp" }).$onUpdate(() => new Date()),
   }),
   (t) => [
-    primaryKey({
-      columns: [t.provider, t.providerAccountId],
-    }),
-    index("account_user_id_idx").on(t.userId),
+    index("paper_created_by_idx").on(t.createdById),
+    index("paper_course_name_idx").on(t.courseName),
+    index("paper_course_code_idx").on(t.courseCode),
+    index("paper_department_idx").on(t.department),
+    index("paper_semester_idx").on(t.semester),
+    index("paper_type_idx").on(t.paperType),
   ],
 );
 
-export const accountsRelations = relations(accounts, ({ one }) => ({
-  user: one(users, { fields: [accounts.userId], references: [users.id] }),
-}));
+export const user = sqliteTable("user", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  emailVerified: integer("email_verified", { mode: "boolean" })
+    .$defaultFn(() => false)
+    .notNull(),
+  image: text("image"),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
 
-export const sessions = createTable(
-  "session",
-  (d) => ({
-    sessionToken: d.text({ length: 255 }).notNull().primaryKey(),
-    userId: d
-      .text({ length: 255 })
-      .notNull()
-      .references(() => users.id),
-    expires: d.integer({ mode: "timestamp" }).notNull(),
+export const session = sqliteTable("session", {
+  id: text("id").primaryKey(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  token: text("token").notNull().unique(),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+});
+
+export const account = sqliteTable("account", {
+  id: text("id").primaryKey(),
+  accountId: text("account_id").notNull(),
+  providerId: text("provider_id").notNull(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  accessToken: text("access_token"),
+  refreshToken: text("refresh_token"),
+  idToken: text("id_token"),
+  accessTokenExpiresAt: integer("access_token_expires_at", {
+    mode: "timestamp",
   }),
-  (t) => [index("session_userId_idx").on(t.userId)],
-);
-
-export const sessionsRelations = relations(sessions, ({ one }) => ({
-  user: one(users, { fields: [sessions.userId], references: [users.id] }),
-}));
-
-export const verificationTokens = createTable(
-  "verification_token",
-  (d) => ({
-    identifier: d.text({ length: 255 }).notNull(),
-    token: d.text({ length: 255 }).notNull(),
-    expires: d.integer({ mode: "timestamp" }).notNull(),
+  refreshTokenExpiresAt: integer("refresh_token_expires_at", {
+    mode: "timestamp",
   }),
-  (t) => [primaryKey({ columns: [t.identifier, t.token] })],
-);
+  scope: text("scope"),
+  password: text("password"),
+  createdAt: integer("created_at", { mode: "timestamp" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).notNull(),
+});
+
+export const verification = sqliteTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: integer("expires_at", { mode: "timestamp" }).notNull(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
+  updatedAt: integer("updated_at", { mode: "timestamp" }).$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
+});

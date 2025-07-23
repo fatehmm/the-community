@@ -1,0 +1,68 @@
+import { Button } from "@/components/ui/button";
+import { BookOpen, Upload } from "lucide-react";
+import Link from "next/link";
+
+export default function Hero() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+      <div className="container mx-auto px-4 py-16 md:py-24">
+        <div className="mx-auto max-w-3xl space-y-8 text-center">
+          {/* University branding */}
+          <div className="space-y-2">
+            <h1 className="font-tobias text-4xl font-light tracking-tight text-slate-900 md:text-6xl">
+              Past Papers Directory
+            </h1>
+          </div>
+
+          {/* Description */}
+          <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
+            Access previous exam papers and study materials shared by fellow
+            students. Find what you need to excel in your courses.
+          </p>
+
+          {/* Action buttons */}
+          <div className="flex flex-col items-center justify-center gap-4 pt-4 sm:flex-row">
+            <Button
+              asChild
+              size="lg"
+              className="w-full px-8 py-3 text-white sm:w-auto"
+            >
+              <Link href="/browse">
+                <BookOpen className="mr-2 h-5 w-5" />
+                Browse Papers
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="w-full bg-transparent px-8 py-3 sm:w-auto"
+            >
+              <Link href="/contribute">
+                <Upload className="mr-2 h-5 w-5" />
+                Contribute Papers
+              </Link>
+            </Button>
+          </div>
+
+          {/* Quick stats or info */}
+          <div className="pt-8 text-sm text-slate-500">
+            <p>Built by students, for students</p>
+            <p>
+              Completely free.{" "}
+              <Button
+                asChild
+                className="p-0 text-slate-500 underline"
+                variant={"link"}
+              >
+                <a href="https://github.com/ku-past-papers/ku-past-papers">
+                  Proudly open source.
+                </a>
+              </Button>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
