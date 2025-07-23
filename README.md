@@ -1,29 +1,114 @@
-# Create T3 App
+# Paper Directory
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+A modern web application for browsing, contributing, and managing academic papers and research documents. Built with the T3 Stack for a robust, type-safe, and scalable experience.
 
-## What's next? How do I make an app with this?
+## Features
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+- **Browse Papers**: Discover and explore academic papers with a modern, responsive interface
+- **Contribute Content**: Upload and share your research papers with the community
+- **User Authentication**: Secure sign-in and sign-up functionality with profile management
+- **PDF Viewer**: Built-in PDF viewing capabilities for seamless document reading
+- **Modern UI**: Beautiful, responsive design with dark/light mode support
+- **Type Safety**: Full TypeScript integration for better development experience
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Tech Stack
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+This project is built with the [T3 Stack](https://create.t3.gg/) and includes:
 
-## Learn More
+- **[Next.js 15](https://nextjs.org)** - React framework with App Router
+- **[TypeScript](https://www.typescriptlang.org/)** - Type-safe JavaScript
+- **[Tailwind CSS](https://tailwindcss.com)** - Utility-first CSS framework
+- **[tRPC](https://trpc.io)** - End-to-end typesafe APIs
+- **[Drizzle ORM](https://orm.drizzle.team)** - Type-safe database toolkit
+- **[Better-Auth](https://better-auth.org)** - Authentication for Next.js
+- **[UploadThing](https://uploadthing.com)** - File upload solution
+- **[Shadcn/ui](https://ui.shadcn.com)** - Re-usable UI components
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## Getting Started
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+### Prerequisites
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+- Node.js 18+ or Bun
+- Database (PostgreSQL recommended)
 
-## How do I deploy this?
+### Installation
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd paper-directory
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+bun install
+```
+
+3. Set up environment variables:
+
+```bash
+cp .env.example .env.local
+```
+
+4. Configure your environment variables in `.env.local`
+
+5. Set up the database:
+
+```bash
+bun run db:push
+```
+
+6. Start the development server:
+
+```bash
+npm run dev
+# or
+bun dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## Project Structure
+
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── api/               # API routes (tRPC, auth, upload)
+│   ├── browse/            # Paper browsing interface
+│   ├── contribute/        # Paper contribution forms
+│   ├── profile/           # User profile management
+│   └── auth/              # Authentication pages
+├── components/            # Reusable UI components
+│   ├── application/       # App-specific components
+│   ├── marketing/         # Landing page components
+│   └── ui/                # Shadcn/ui components
+├── server/                # Server-side code
+│   ├── api/               # tRPC routers and procedures
+│   └── db/                # Database schema and configuration
+└── lib/                   # Utility functions and configurations
+```
+
+## Development
+
+- `bun run dev` - Start development server
+- `bun run build` - Build for production
+- `bun run start` - Start production server
+- `bun run lint` - Run ESLint
+- `bun run db:push` - Push database schema changes
+- `bun run db:studio` - Open Drizzle Studio
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License. - This means the code is completely open source, you can do whatever you want to do with it.

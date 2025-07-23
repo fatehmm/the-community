@@ -55,7 +55,7 @@ export default function Hero() {
                 className="p-0 text-slate-500 underline"
                 variant={"link"}
               >
-                <a href="https://github.com/ku-past-papers/ku-past-papers">
+                <a href="https://github.com/fatehmm/paper-directory">
                   Proudly open source.
                 </a>
               </Button>
