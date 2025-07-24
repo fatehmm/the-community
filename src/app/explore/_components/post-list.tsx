@@ -8,7 +8,7 @@ export function PostList() {
     data: posts,
     isLoading,
     error,
-  } = api.post.getAll.useQuery({ limit: 20 });
+  } = api.post.getAll.useQuery({ limit: 100 });
 
   if (isLoading) {
     return (
