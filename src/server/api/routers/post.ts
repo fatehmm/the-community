@@ -1,4 +1,4 @@
-import { and, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, isNull, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import {
@@ -70,9 +70,10 @@ export const postRouter = createTRPCRouter({
       });
 
       // Get user interaction data if user is authenticated
-      let userInteractions: {
-        [key: number]: { liked: boolean; retweeted: boolean };
-      } = {};
+      let userInteractions: Record<
+        number,
+        { liked: boolean; retweeted: boolean }
+      > = {};
 
       if (ctx.session?.user?.id) {
         const postIds = posts.map((p) => p.id);
@@ -110,7 +111,7 @@ export const postRouter = createTRPCRouter({
             };
             return acc;
           },
-          {} as { [key: number]: { liked: boolean; retweeted: boolean } },
+          {} as Record<number, { liked: boolean; retweeted: boolean }>,
         );
       }
 
@@ -123,7 +124,7 @@ export const postRouter = createTRPCRouter({
       return {
         items: posts.map((p) => ({
           ...p,
-          userInteractions: userInteractions[p.id] || {
+          userInteractions: userInteractions[p.id] ?? {
             liked: false,
             retweeted: false,
           },
@@ -148,7 +149,7 @@ export const postRouter = createTRPCRouter({
           ? and(eq(post.replyToId, postId), lt(post.id, cursor))
           : eq(post.replyToId, postId),
         limit: limit + 1,
-        orderBy: [desc(post.createdAt)],
+        orderBy: [asc(post.createdAt)],
         with: {
           createdBy: {
             columns: {
@@ -161,9 +162,10 @@ export const postRouter = createTRPCRouter({
       });
 
       // Get user interaction data if user is authenticated
-      let userInteractions: {
-        [key: number]: { liked: boolean; retweeted: boolean };
-      } = {};
+      let userInteractions: Record<
+        number,
+        { liked: boolean; retweeted: boolean }
+      > = {};
 
       if (ctx.session?.user?.id) {
         const commentIds = comments.map((c) => c.id);
@@ -188,7 +190,7 @@ export const postRouter = createTRPCRouter({
             };
             return acc;
           },
-          {} as { [key: number]: { liked: boolean; retweeted: boolean } },
+          {} as Record<number, { liked: boolean; retweeted: boolean }>,
         );
       }
 
@@ -201,7 +203,7 @@ export const postRouter = createTRPCRouter({
       return {
         items: comments.map((c) => ({
           ...c,
-          userInteractions: userInteractions[c.id] || {
+          userInteractions: userInteractions[c.id] ?? {
             liked: false,
             retweeted: false,
           },

@@ -64,7 +64,9 @@ export function Navigation() {
         <div className="flex h-full flex-col">
           {/* Logo/Brand Section */}
           <div className="border-b border-white/20 p-6">
-            <h1 className="text-foreground text-xl font-bold">The Community</h1>
+            <h1 className="text-foreground font-tobias text-xl font-medium">
+              The Community
+            </h1>
           </div>
 
           {/* Navigation Items */}
