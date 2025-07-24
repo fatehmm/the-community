@@ -6,7 +6,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import { post, postLike, postRetweet } from "@/server/db/schema";
+import { post, postLike, postRetweet, user } from "@/server/db/schema";
 
 export const postRouter = createTRPCRouter({
   create: protectedProcedure
@@ -129,6 +129,105 @@ export const postRouter = createTRPCRouter({
             retweeted: false,
           },
         })),
+        nextCursor,
+      };
+    }),
+
+  getAllInfinite: publicProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(50).default(20),
+        cursor: z.number().optional(),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { limit, cursor } = input;
+
+      // Optimized query with user interactions in a single query
+      const postsWithInteractions = await ctx.db
+        .select({
+          id: post.id,
+          content: post.content,
+          mediaUrls: post.mediaUrls,
+          replyToId: post.replyToId,
+          replyCount: post.replyCount,
+          likeCount: post.likeCount,
+          retweetCount: post.retweetCount,
+          createdAt: post.createdAt,
+          createdById: post.createdById,
+          // User data
+          userName: user.name,
+          userImage: user.image,
+          // User interactions (will be null if not authenticated or no interaction)
+          userLiked: postLike.postId,
+          userRetweeted: postRetweet.originalPostId,
+        })
+        .from(post)
+        .leftJoin(user, eq(user.id, post.createdById))
+        .leftJoin(
+          postLike,
+          ctx.session?.user?.id
+            ? and(
+                eq(postLike.postId, post.id),
+                eq(postLike.userId, ctx.session.user.id),
+              )
+            : undefined,
+        )
+        .leftJoin(
+          postRetweet,
+          ctx.session?.user?.id
+            ? and(
+                eq(postRetweet.originalPostId, post.id),
+                eq(postRetweet.userId, ctx.session.user.id),
+              )
+            : undefined,
+        )
+        .where(
+          cursor
+            ? and(lt(post.id, cursor), isNull(post.replyToId))
+            : isNull(post.replyToId),
+        )
+        .orderBy(desc(post.createdAt))
+        .limit(limit + 1);
+
+      // Group by post ID to handle multiple rows from joins
+      const postsMap = new Map();
+
+      for (const row of postsWithInteractions) {
+        if (!postsMap.has(row.id)) {
+          postsMap.set(row.id, {
+            id: row.id,
+            content: row.content,
+            mediaUrls: row.mediaUrls,
+            replyToId: row.replyToId,
+            replyCount: row.replyCount,
+            likeCount: row.likeCount,
+            retweetCount: row.retweetCount,
+            createdAt: row.createdAt,
+            createdById: row.createdById,
+            createdBy: {
+              id: row.createdById,
+              name: row.userName,
+              image: row.userImage,
+            },
+            userInteractions: {
+              liked: !!row.userLiked,
+              retweeted: !!row.userRetweeted,
+            },
+          });
+        }
+      }
+
+      const posts = Array.from(postsMap.values());
+
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (posts.length > limit) {
+        const nextItem = posts.pop();
+        nextCursor = nextItem?.id;
+      }
+
+      return {
+        items: posts,
         nextCursor,
       };
     }),

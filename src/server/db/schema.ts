@@ -48,6 +48,8 @@ export const post = createTable(
     index("reply_to_idx").on(t.replyToId),
     index("quote_post_idx").on(t.quotePostId),
     index("created_at_idx").on(t.createdAt),
+    // Composite index for main feed query (replyToId IS NULL ORDER BY createdAt DESC)
+    index("feed_query_idx").on(t.replyToId, t.createdAt),
   ],
 );
 

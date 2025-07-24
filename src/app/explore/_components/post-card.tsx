@@ -153,7 +153,7 @@ export function PostCard({ post }: PostCardProps) {
     onSuccess: () => {
       setIsLoading(false);
       // Invalidate and refetch posts to get updated counts
-      void utils.post.getAll.invalidate();
+      void utils.post.getAllInfinite?.invalidate();
     },
     onError: (error) => {
       console.error("Error liking post:", error);
@@ -167,7 +167,7 @@ export function PostCard({ post }: PostCardProps) {
   const retweetMutation = api.post.retweet.useMutation({
     onSuccess: () => {
       setIsLoading(false);
-      void utils.post.getAll.invalidate();
+      void utils.post.getAllInfinite?.invalidate();
     },
     onError: (error) => {
       console.error("Error retweeting post:", error);
@@ -188,7 +188,7 @@ export function PostCard({ post }: PostCardProps) {
         void loadComments();
       }
       // Invalidate posts to update reply count
-      void utils.post.getAll.invalidate();
+      void utils.post.getAllInfinite?.invalidate();
     },
     onError: (error) => {
       console.error("Error commenting on post:", error);

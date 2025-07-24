@@ -1,0 +1,1 @@
+CREATE INDEX `feed_query_idx` ON `post` (`replyToId`,`createdAt`);
