@@ -9,11 +9,12 @@ import { connection } from "next/server";
 import { Suspense } from "react";
 import { extractRouterConfig } from "uploadthing/server";
 import AuthOverlay from "../components/application/auth-overlay";
+import { Navigation } from "../components/application/navigation";
 import { ourFileRouter } from "./api/uploadthing/core";
 
 export const metadata: Metadata = {
-  title: "Past Papers",
-  description: "Past paper directory for university students",
+  title: "Social Media",
+  description: "Connect and share with the community",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -144,8 +145,9 @@ export default function RootLayout({
         </Suspense>
         <TRPCReactProvider>
           <AuthOverlay />
+          <Navigation />
           <Toaster />
-          {children}
+          <main className="md:ml-64">{children}</main>
         </TRPCReactProvider>
       </body>
     </html>

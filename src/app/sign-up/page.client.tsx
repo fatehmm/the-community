@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { signUp } from "@/lib/auth-client";
 import { Loader2, X } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -155,7 +156,7 @@ export default function SignUp() {
                 password,
                 name: `${firstName} ${lastName}`,
                 image: image ? await convertImageToBase64(image) : "",
-                callbackURL: "/dashboard",
+                callbackURL: "/explore",
                 fetchOptions: {
                   onResponse: () => {
                     setLoading(false);
@@ -167,7 +168,7 @@ export default function SignUp() {
                     toast.error(ctx.error.message);
                   },
                   onSuccess: async () => {
-                    router.push("/dashboard");
+                    router.push("/explore");
                   },
                 },
               });
@@ -184,7 +185,10 @@ export default function SignUp() {
       <CardFooter>
         <div className="flex w-full justify-center border-t py-4">
           <p className="text-center text-xs text-neutral-500">
-            Secured by <span className="text-orange-400">better-auth.</span>
+            Already have an account?{" "}
+            <Link href="/sign-in" className="underline">
+              <span className="cursor-pointer">Sign in</span>
+            </Link>
           </p>
         </div>
       </CardFooter>

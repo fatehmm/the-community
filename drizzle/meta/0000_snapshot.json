@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "beb96e23-bb47-4b3a-8614-fdb26acae340",
+  "id": "39133628-41a1-4d32-bd70-a78a812558ca",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "account": {
@@ -119,153 +119,8 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "paper-directory_paper": {
-      "name": "paper-directory_paper",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "integer",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": true
-        },
-        "courseName": {
-          "name": "courseName",
-          "type": "text(256)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "courseCode": {
-          "name": "courseCode",
-          "type": "text(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "professorName": {
-          "name": "professorName",
-          "type": "text(256)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "semester": {
-          "name": "semester",
-          "type": "text(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "department": {
-          "name": "department",
-          "type": "text(100)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "paperType": {
-          "name": "paperType",
-          "type": "text(20)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "paperPdfUrl": {
-          "name": "paperPdfUrl",
-          "type": "text(500)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdById": {
-          "name": "createdById",
-          "type": "text(255)",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(unixepoch())"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "paper_created_by_idx": {
-          "name": "paper_created_by_idx",
-          "columns": [
-            "createdById"
-          ],
-          "isUnique": false
-        },
-        "paper_course_name_idx": {
-          "name": "paper_course_name_idx",
-          "columns": [
-            "courseName"
-          ],
-          "isUnique": false
-        },
-        "paper_course_code_idx": {
-          "name": "paper_course_code_idx",
-          "columns": [
-            "courseCode"
-          ],
-          "isUnique": false
-        },
-        "paper_department_idx": {
-          "name": "paper_department_idx",
-          "columns": [
-            "department"
-          ],
-          "isUnique": false
-        },
-        "paper_semester_idx": {
-          "name": "paper_semester_idx",
-          "columns": [
-            "semester"
-          ],
-          "isUnique": false
-        },
-        "paper_type_idx": {
-          "name": "paper_type_idx",
-          "columns": [
-            "paperType"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "paper-directory_paper_createdById_user_id_fk": {
-          "name": "paper-directory_paper_createdById_user_id_fk",
-          "tableFrom": "paper-directory_paper",
-          "tableTo": "user",
-          "columnsFrom": [
-            "createdById"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "paper-directory_post": {
-      "name": "paper-directory_post",
+    "hashtag": {
+      "name": "hashtag",
       "columns": {
         "id": {
           "name": "id",
@@ -276,7 +131,138 @@
         },
         "name": {
           "name": "name",
-          "type": "text(256)",
+          "type": "text(100)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "postCount": {
+          "name": "postCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "hashtag_name_unique": {
+          "name": "hashtag_name_unique",
+          "columns": [
+            "name"
+          ],
+          "isUnique": true
+        },
+        "hashtag_name_idx": {
+          "name": "hashtag_name_idx",
+          "columns": [
+            "name"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "post": {
+      "name": "post",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "content": {
+          "name": "content",
+          "type": "text(1000)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "mediaUrls": {
+          "name": "mediaUrls",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "isRetweet": {
+          "name": "isRetweet",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "originalPostId": {
+          "name": "originalPostId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "replyToId": {
+          "name": "replyToId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "quotePostId": {
+          "name": "quotePostId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "likeCount": {
+          "name": "likeCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "retweetCount": {
+          "name": "retweetCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "replyCount": {
+          "name": "replyCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "viewCount": {
+          "name": "viewCount",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "isSensitive": {
+          "name": "isSensitive",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "isPinned": {
+          "name": "isPinned",
+          "type": "integer",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -312,18 +298,46 @@
           ],
           "isUnique": false
         },
-        "name_idx": {
-          "name": "name_idx",
+        "content_idx": {
+          "name": "content_idx",
           "columns": [
-            "name"
+            "content"
+          ],
+          "isUnique": false
+        },
+        "original_post_idx": {
+          "name": "original_post_idx",
+          "columns": [
+            "originalPostId"
+          ],
+          "isUnique": false
+        },
+        "reply_to_idx": {
+          "name": "reply_to_idx",
+          "columns": [
+            "replyToId"
+          ],
+          "isUnique": false
+        },
+        "quote_post_idx": {
+          "name": "quote_post_idx",
+          "columns": [
+            "quotePostId"
+          ],
+          "isUnique": false
+        },
+        "created_at_idx": {
+          "name": "created_at_idx",
+          "columns": [
+            "createdAt"
           ],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "paper-directory_post_createdById_user_id_fk": {
-          "name": "paper-directory_post_createdById_user_id_fk",
-          "tableFrom": "paper-directory_post",
+        "post_createdById_user_id_fk": {
+          "name": "post_createdById_user_id_fk",
+          "tableFrom": "post",
           "tableTo": "user",
           "columnsFrom": [
             "createdById"
@@ -332,6 +346,389 @@
             "id"
           ],
           "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "post_bookmark": {
+      "name": "post_bookmark",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "postId": {
+          "name": "postId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "bookmark_post_idx": {
+          "name": "bookmark_post_idx",
+          "columns": [
+            "postId"
+          ],
+          "isUnique": false
+        },
+        "bookmark_user_idx": {
+          "name": "bookmark_user_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        },
+        "bookmark_unique": {
+          "name": "bookmark_unique",
+          "columns": [
+            "postId",
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "post_bookmark_postId_post_id_fk": {
+          "name": "post_bookmark_postId_post_id_fk",
+          "tableFrom": "post_bookmark",
+          "tableTo": "post",
+          "columnsFrom": [
+            "postId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "post_bookmark_userId_user_id_fk": {
+          "name": "post_bookmark_userId_user_id_fk",
+          "tableFrom": "post_bookmark",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "post_hashtag": {
+      "name": "post_hashtag",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "postId": {
+          "name": "postId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "hashtagId": {
+          "name": "hashtagId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "post_hashtag_post_idx": {
+          "name": "post_hashtag_post_idx",
+          "columns": [
+            "postId"
+          ],
+          "isUnique": false
+        },
+        "post_hashtag_hashtag_idx": {
+          "name": "post_hashtag_hashtag_idx",
+          "columns": [
+            "hashtagId"
+          ],
+          "isUnique": false
+        },
+        "post_hashtag_unique": {
+          "name": "post_hashtag_unique",
+          "columns": [
+            "postId",
+            "hashtagId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "post_hashtag_postId_post_id_fk": {
+          "name": "post_hashtag_postId_post_id_fk",
+          "tableFrom": "post_hashtag",
+          "tableTo": "post",
+          "columnsFrom": [
+            "postId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "post_hashtag_hashtagId_hashtag_id_fk": {
+          "name": "post_hashtag_hashtagId_hashtag_id_fk",
+          "tableFrom": "post_hashtag",
+          "tableTo": "hashtag",
+          "columnsFrom": [
+            "hashtagId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "post_like": {
+      "name": "post_like",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "postId": {
+          "name": "postId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "post_like_post_idx": {
+          "name": "post_like_post_idx",
+          "columns": [
+            "postId"
+          ],
+          "isUnique": false
+        },
+        "post_like_user_idx": {
+          "name": "post_like_user_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        },
+        "post_like_unique": {
+          "name": "post_like_unique",
+          "columns": [
+            "postId",
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "post_like_postId_post_id_fk": {
+          "name": "post_like_postId_post_id_fk",
+          "tableFrom": "post_like",
+          "tableTo": "post",
+          "columnsFrom": [
+            "postId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "post_like_userId_user_id_fk": {
+          "name": "post_like_userId_user_id_fk",
+          "tableFrom": "post_like",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "post_retweet": {
+      "name": "post_retweet",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "originalPostId": {
+          "name": "originalPostId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "retweetPostId": {
+          "name": "retweetPostId",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "userId": {
+          "name": "userId",
+          "type": "text(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(unixepoch())"
+        }
+      },
+      "indexes": {
+        "retweet_original_idx": {
+          "name": "retweet_original_idx",
+          "columns": [
+            "originalPostId"
+          ],
+          "isUnique": false
+        },
+        "retweet_retweet_idx": {
+          "name": "retweet_retweet_idx",
+          "columns": [
+            "retweetPostId"
+          ],
+          "isUnique": false
+        },
+        "retweet_user_idx": {
+          "name": "retweet_user_idx",
+          "columns": [
+            "userId"
+          ],
+          "isUnique": false
+        },
+        "retweet_unique": {
+          "name": "retweet_unique",
+          "columns": [
+            "originalPostId",
+            "userId"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "post_retweet_originalPostId_post_id_fk": {
+          "name": "post_retweet_originalPostId_post_id_fk",
+          "tableFrom": "post_retweet",
+          "tableTo": "post",
+          "columnsFrom": [
+            "originalPostId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "post_retweet_retweetPostId_post_id_fk": {
+          "name": "post_retweet_retweetPostId_post_id_fk",
+          "tableFrom": "post_retweet",
+          "tableTo": "post",
+          "columnsFrom": [
+            "retweetPostId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "post_retweet_userId_user_id_fk": {
+          "name": "post_retweet_userId_user_id_fk",
+          "tableFrom": "post_retweet",
+          "tableTo": "user",
+          "columnsFrom": [
+            "userId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

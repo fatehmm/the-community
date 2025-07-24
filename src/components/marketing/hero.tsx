@@ -1,23 +1,23 @@
 import { Button } from "@/components/ui/button";
-import { BookOpen, Upload } from "lucide-react";
+import { MessageSquare, Users } from "lucide-react";
 import Link from "next/link";
 
 export default function Hero() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white pb-24">
       <div className="container mx-auto px-4 py-16 md:py-24">
         <div className="mx-auto max-w-3xl space-y-8 text-center">
-          {/* University branding */}
+          {/* App branding */}
           <div className="space-y-2">
             <h1 className="font-tobias text-4xl font-light tracking-tight text-slate-900 md:text-6xl">
-              Past Papers Directory
+              The Community
             </h1>
           </div>
 
           {/* Description */}
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-slate-600 md:text-xl">
-            Access previous exam papers and study materials shared by fellow
-            students. Find what you need to excel in your courses.
+            Connect with others, share your thoughts, and discover what&apos;s
+            happening in your community.
           </p>
 
           {/* Action buttons */}
@@ -27,9 +27,9 @@ export default function Hero() {
               size="lg"
               className="w-full px-8 py-3 text-white sm:w-auto"
             >
-              <Link href="/browse">
-                <BookOpen className="mr-2 h-5 w-5" />
-                Browse Papers
+              <Link href="/explore">
+                <MessageSquare className="mr-2 h-5 w-5" />
+                Explore Posts
               </Link>
             </Button>
             <Button
@@ -38,16 +38,16 @@ export default function Hero() {
               size="lg"
               className="w-full bg-transparent px-8 py-3 sm:w-auto"
             >
-              <Link href="/contribute">
-                <Upload className="mr-2 h-5 w-5" />
-                Contribute Papers
+              <Link href="/profile">
+                <Users className="mr-2 h-5 w-5" />
+                View Profile
               </Link>
             </Button>
           </div>
 
           {/* Quick stats or info */}
           <div className="pt-8 text-sm text-slate-500">
-            <p>Built by students, for students</p>
+            <p>Connect and share with your community</p>
             <p>
               Completely free.{" "}
               <Button
@@ -55,7 +55,7 @@ export default function Hero() {
                 className="p-0 text-slate-500 underline"
                 variant={"link"}
               >
-                <a href="https://github.com/fatehmm/paper-directory">
+                <a href="https://github.com/fatehmm/social-media">
                   Proudly open source.
                 </a>
               </Button>
