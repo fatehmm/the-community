@@ -332,11 +332,75 @@ export function PostCard({ post }: PostCardProps) {
           <p className="text-foreground">{post.content}</p>
           {post.mediaUrls && (
             <div className="overflow-hidden rounded-lg">
-              <img
-                src={post.mediaUrls}
-                alt="Post media"
-                className="h-auto w-full"
-              />
+              {(() => {
+                try {
+                  const mediaUrls = JSON.parse(post.mediaUrls) as string[];
+                  if (mediaUrls.length === 1) {
+                    return (
+                      <img
+                        src={mediaUrls[0]}
+                        alt="Post media"
+                        className="h-auto max-h-96 w-full object-cover"
+                      />
+                    );
+                  } else if (mediaUrls.length === 2) {
+                    return (
+                      <div className="grid grid-cols-2 gap-1">
+                        {mediaUrls.map((url, index) => (
+                          <img
+                            key={index}
+                            src={url}
+                            alt={`Post media ${index + 1}`}
+                            className="h-48 w-full object-cover"
+                          />
+                        ))}
+                      </div>
+                    );
+                  } else if (mediaUrls.length === 3) {
+                    return (
+                      <div className="grid grid-cols-2 gap-1">
+                        <img
+                          src={mediaUrls[0]}
+                          alt="Post media 1"
+                          className="row-span-2 h-48 w-full object-cover"
+                        />
+                        <img
+                          src={mediaUrls[1]}
+                          alt="Post media 2"
+                          className="h-24 w-full object-cover"
+                        />
+                        <img
+                          src={mediaUrls[2]}
+                          alt="Post media 3"
+                          className="h-24 w-full object-cover"
+                        />
+                      </div>
+                    );
+                  } else if (mediaUrls.length === 4) {
+                    return (
+                      <div className="grid grid-cols-2 gap-1">
+                        {mediaUrls.map((url, index) => (
+                          <img
+                            key={index}
+                            src={url}
+                            alt={`Post media ${index + 1}`}
+                            className="h-24 w-full object-cover"
+                          />
+                        ))}
+                      </div>
+                    );
+                  }
+                } catch (error) {
+                  // Fallback for single image stored as string
+                  return (
+                    <img
+                      src={post.mediaUrls}
+                      alt="Post media"
+                      className="h-auto max-h-96 w-full object-cover"
+                    />
+                  );
+                }
+              })()}
             </div>
           )}
           <div className="flex items-center justify-between pt-2">

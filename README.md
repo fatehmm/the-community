@@ -1,14 +1,15 @@
-# Paper Directory
+# The Community
 
-A modern web application for browsing, contributing, and managing academic papers and research documents. Built with the T3 Stack for a robust, type-safe, and scalable experience.
+A modern social media application for sharing posts, images, and connecting with others. Built with the T3 Stack for a robust, type-safe, and scalable experience.
 
 ## Features
 
-- **Browse Papers**: Discover and explore academic papers with a modern, responsive interface
-- **Contribute Content**: Upload and share your research papers with the community
+- **Social Posts**: Create and share posts with text and images
+- **Image Upload**: Upload up to 4 images per post with preview functionality
 - **User Authentication**: Secure sign-in and sign-up functionality with profile management
-- **PDF Viewer**: Built-in PDF viewing capabilities for seamless document reading
-- **Modern UI**: Beautiful, responsive design with dark/light mode support
+- **Interactive Posts**: Like, retweet, and comment on posts
+- **Real-time Updates**: Optimistic UI updates for better user experience
+- **Modern UI**: Beautiful, responsive design with dark mode support
 - **Type Safety**: Full TypeScript integration for better development experience
 
 ## Tech Stack
@@ -29,7 +30,7 @@ This project is built with the [T3 Stack](https://create.t3.gg/) and includes:
 ### Prerequisites
 
 - Node.js 18+ or Bun
-- Database (PostgreSQL recommended)
+- Database (SQLite for development, PostgreSQL for production)
 
 ### Installation
 
@@ -37,7 +38,7 @@ This project is built with the [T3 Stack](https://create.t3.gg/) and includes:
 
 ```bash
 git clone <repository-url>
-cd paper-directory
+cd the-community
 ```
 
 2. Install dependencies:
@@ -54,7 +55,22 @@ bun install
 cp .env.example .env.local
 ```
 
-4. Configure your environment variables in `.env.local`
+4. Configure your environment variables in `.env.local`:
+
+```env
+# Database
+DATABASE_URL="file:./db.sqlite"
+DATABASE_TOKEN="your-database-token"
+
+# Authentication
+BETTER_AUTH_SECRET="your-auth-secret"
+BETTER_AUTH_URL="http://localhost:3000"
+
+# UploadThing (for image uploads)
+UPLOADTHING_SECRET="your-uploadthing-secret"
+UPLOADTHING_APP_ID="your-uploadthing-app-id"
+NEXT_PUBLIC_UPLOADTHING_APP_ID="your-uploadthing-app-id"
+```
 
 5. Set up the database:
 
@@ -78,8 +94,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the application.
 src/
 ├── app/                    # Next.js App Router pages
 │   ├── api/               # API routes (tRPC, auth, upload)
-│   ├── browse/            # Paper browsing interface
-│   ├── contribute/        # Paper contribution forms
+│   ├── explore/           # Social media feed and post creation
 │   ├── profile/           # User profile management
 │   └── auth/              # Authentication pages
 ├── components/            # Reusable UI components
@@ -91,6 +106,32 @@ src/
 │   └── db/                # Database schema and configuration
 └── lib/                   # Utility functions and configurations
 ```
+
+## Features in Detail
+
+### Image Upload
+
+- Upload up to 4 images per post
+- Drag and drop or click to upload
+- Image preview with remove functionality
+- Automatic image optimization and storage via UploadThing
+- Responsive grid layout for multiple images
+
+### Social Interactions
+
+- Like posts with real-time count updates
+- Retweet posts to share with your followers
+- Comment on posts with threaded discussions
+- Delete your own posts
+- View post statistics (likes, retweets, comments)
+
+### User Experience
+
+- Optimistic UI updates for immediate feedback
+- Loading states and error handling
+- Responsive design for all devices
+- Dark mode interface
+- Real-time post updates
 
 ## Development
 
