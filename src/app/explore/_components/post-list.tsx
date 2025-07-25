@@ -1,7 +1,8 @@
 "use client";
 
+import { CACHE_CONFIG, POLLING_CONFIG } from "@/lib/config";
 import { api } from "@/trpc/react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { PostCard } from "./post-card";
 import { PostCardSkeleton } from "./post-card-skeleton";
@@ -14,6 +15,10 @@ export function PostList() {
     rootMargin: "100px",
   });
 
+  const lastPollTime = useRef<number>(Date.now());
+  const isPolling = useRef<boolean>(false);
+  const [hasNewPosts, setHasNewPosts] = useState<boolean>(false);
+
   const {
     data,
     isLoading,
@@ -21,27 +26,88 @@ export function PostList() {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    refetch,
   } = api.post.getAllInfinite.useInfiniteQuery(
     {
       limit: POSTS_PER_PAGE,
     },
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
-      staleTime: 1000 * 60 * 5, // 5 minutes
-      gcTime: 1000 * 60 * 10, // 10 minutes (formerly cacheTime)
+      staleTime: CACHE_CONFIG.STALE_TIME,
+      gcTime: CACHE_CONFIG.GC_TIME,
       refetchOnWindowFocus: false,
       refetchOnMount: false,
     },
   );
 
+  // Background polling for new posts
+  const getNewPostsQuery = api.post.getNewPosts.useQuery(
+    { since: lastPollTime.current },
+    {
+      enabled: false, // Don't run automatically
+      staleTime: 0, // Always consider stale
+    },
+  );
+
+  useEffect(() => {
+    const pollForNewPosts = async () => {
+      if (isPolling.current) return;
+
+      isPolling.current = true;
+      try {
+        // Check for new posts since last poll
+        const result = await getNewPostsQuery.refetch();
+
+        if (result.data?.items && result.data.items.length > 0) {
+          // New posts found, show notification
+          setHasNewPosts(true);
+        }
+      } catch (error) {
+        console.error("Background polling error:", error);
+      } finally {
+        isPolling.current = false;
+      }
+    };
+
+    const interval = setInterval(() => {
+      void pollForNewPosts();
+    }, POLLING_CONFIG.POSTS_INTERVAL);
+
+    // Also poll when user becomes active (tab focus, visibility change)
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        void pollForNewPosts();
+      }
+    };
+
+    const handleFocus = () => {
+      void pollForNewPosts();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleFocus);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleFocus);
+    };
+  }, [refetch, getNewPostsQuery]);
+
+  const handleRefresh = async () => {
+    setHasNewPosts(false);
+    lastPollTime.current = Date.now();
+    await refetch();
+  };
+
   // Memoize the flattened posts to avoid unnecessary re-renders
   const allPosts = useMemo(() => {
-    return data?.pages.flatMap((page) => page.items) ?? [];
+    return data?.pages.flatMap((page) => page.items ?? []) ?? [];
   }, [data?.pages]);
 
   useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage();
+      void fetchNextPage();
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
 
@@ -81,6 +147,24 @@ export function PostList() {
 
   return (
     <div className="space-y-4">
+      {/* New posts notification */}
+      {hasNewPosts && (
+        <div className="rounded-lg border border-blue-500/20 bg-blue-500/10 p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <div className="h-2 w-2 animate-pulse rounded-full bg-blue-500"></div>
+              <span className="text-sm text-blue-400">New posts available</span>
+            </div>
+            <button
+              onClick={handleRefresh}
+              className="text-sm font-medium text-blue-400 hover:text-blue-300"
+            >
+              Refresh
+            </button>
+          </div>
+        </div>
+      )}
+
       {allPosts.map((post) => (
         <PostCard key={post.id} post={post} />
       ))}
@@ -96,7 +180,7 @@ export function PostList() {
         )}
         {!hasNextPage && allPosts.length > 0 && (
           <div className="text-center text-sm text-gray-400">
-            You've reached the end of the feed
+            You&apos;ve reached the end of the feed
           </div>
         )}
       </div>

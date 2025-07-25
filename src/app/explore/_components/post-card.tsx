@@ -4,6 +4,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSession } from "@/lib/auth-client";
+import { POLLING_CONFIG } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 import { formatDistanceToNow } from "date-fns";
@@ -16,7 +17,7 @@ import {
   Send,
   Trash2,
 } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Comment {
   id: number;
@@ -217,6 +218,55 @@ export function PostCard({ post }: PostCardProps) {
     { postId: post.id, limit: 10 },
     { enabled: showComments },
   );
+
+  // Background polling for new comments
+  const [lastCommentPoll, setLastCommentPoll] = useState<number>(Date.now());
+  const [hasNewComments, setHasNewComments] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (!showComments) return;
+
+    const pollForNewComments = async () => {
+      try {
+        // Check for new comments since last poll
+        const newComments = await fetch(
+          `/api/trpc/post.getNewComments?batch=1&input=${encodeURIComponent(
+            JSON.stringify({
+              "0": {
+                json: {
+                  postId: post.id,
+                  since: lastCommentPoll,
+                },
+              },
+            }),
+          )}`,
+        ).then((res) => res.json());
+
+        if (
+          newComments[0]?.result?.data?.items &&
+          newComments[0].result.data.items.length > 0
+        ) {
+          // New comments found, show notification
+          setHasNewComments(true);
+        }
+      } catch (error) {
+        console.error("Background comment polling error:", error);
+      }
+    };
+
+    const interval = setInterval(
+      pollForNewComments,
+      POLLING_CONFIG.COMMENTS_INTERVAL,
+    );
+
+    return () => clearInterval(interval);
+  }, [showComments, post.id, lastCommentPoll, commentsQuery]);
+
+  const handleRefreshComments = async () => {
+    setHasNewComments(false);
+    setLastCommentPoll(Date.now());
+    void commentsQuery.refetch();
+  };
 
   const loadComments = async () => {
     if (isLoadingComments) return;
@@ -515,6 +565,26 @@ export function PostCard({ post }: PostCardProps) {
 
           {showComments && (
             <div className="mt-4 space-y-2 rounded-lg border border-white/10 bg-white/5 p-4">
+              {/* New comments notification */}
+              {hasNewComments && (
+                <div className="mb-3 rounded-lg border border-green-500/20 bg-green-500/10 p-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      <div className="h-2 w-2 animate-pulse rounded-full bg-green-500"></div>
+                      <span className="text-sm text-green-400">
+                        New comments available
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleRefreshComments}
+                      className="text-sm font-medium text-green-400 hover:text-green-300"
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {commentsQuery.isLoading ? (
                 <div className="text-center text-sm text-gray-400">
                   Loading comments...

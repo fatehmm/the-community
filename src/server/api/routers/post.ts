@@ -143,8 +143,8 @@ export const postRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       const { limit, cursor } = input;
 
-      // Optimized query with user interactions in a single query
-      const postsWithInteractions = await ctx.db
+      // Build the base query
+      let query = ctx.db
         .select({
           id: post.id,
           content: post.content,
@@ -163,25 +163,33 @@ export const postRouter = createTRPCRouter({
           userRetweeted: postRetweet.originalPostId,
         })
         .from(post)
-        .leftJoin(user, eq(user.id, post.createdById))
-        .leftJoin(
-          postLike,
-          ctx.session?.user?.id
-            ? and(
-                eq(postLike.postId, post.id),
-                eq(postLike.userId, ctx.session.user.id),
-              )
-            : undefined,
-        )
-        .leftJoin(
-          postRetweet,
-          ctx.session?.user?.id
-            ? and(
-                eq(postRetweet.originalPostId, post.id),
-                eq(postRetweet.userId, ctx.session.user.id),
-              )
-            : undefined,
-        )
+        .leftJoin(user, eq(user.id, post.createdById));
+
+      // Add conditional joins only if user is authenticated
+      if (ctx.session?.user?.id) {
+        query = query
+          .leftJoin(
+            postLike,
+            and(
+              eq(postLike.postId, post.id),
+              eq(postLike.userId, ctx.session.user.id),
+            ),
+          )
+          .leftJoin(
+            postRetweet,
+            and(
+              eq(postRetweet.originalPostId, post.id),
+              eq(postRetweet.userId, ctx.session.user.id),
+            ),
+          );
+      } else {
+        // For unauthenticated users, still join but with conditions that won't match
+        query = query
+          .leftJoin(postLike, sql`1 = 0`)
+          .leftJoin(postRetweet, sql`1 = 0`);
+      }
+
+      const postsWithInteractions = await query
         .where(
           cursor
             ? and(lt(post.id, cursor), isNull(post.replyToId))
@@ -308,6 +316,106 @@ export const postRouter = createTRPCRouter({
           },
         })),
         nextCursor,
+      };
+    }),
+
+  getNewComments: publicProcedure
+    .input(
+      z.object({
+        postId: z.number(),
+        since: z.number(), // timestamp since last poll
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { postId, since } = input;
+      const sinceDate = new Date(since);
+
+      // Build the base query
+      let query = ctx.db
+        .select({
+          id: post.id,
+          content: post.content,
+          mediaUrls: post.mediaUrls,
+          replyToId: post.replyToId,
+          replyCount: post.replyCount,
+          likeCount: post.likeCount,
+          retweetCount: post.retweetCount,
+          createdAt: post.createdAt,
+          createdById: post.createdById,
+          // User data
+          userName: user.name,
+          userImage: user.image,
+          // User interactions (will be null if not authenticated or no interaction)
+          userLiked: postLike.postId,
+          userRetweeted: postRetweet.originalPostId,
+        })
+        .from(post)
+        .leftJoin(user, eq(user.id, post.createdById));
+
+      // Add conditional joins only if user is authenticated
+      if (ctx.session?.user?.id) {
+        query = query
+          .leftJoin(
+            postLike,
+            and(
+              eq(postLike.postId, post.id),
+              eq(postLike.userId, ctx.session.user.id),
+            ),
+          )
+          .leftJoin(
+            postRetweet,
+            and(
+              eq(postRetweet.originalPostId, post.id),
+              eq(postRetweet.userId, ctx.session.user.id),
+            ),
+          );
+      } else {
+        // For unauthenticated users, still join but with conditions that won't match
+        query = query
+          .leftJoin(postLike, sql`1 = 0`)
+          .leftJoin(postRetweet, sql`1 = 0`);
+      }
+
+      const newComments = await query
+        .where(
+          and(
+            eq(post.replyToId, postId),
+            sql`${post.createdAt} > ${sinceDate.getTime() / 1000}`,
+          ),
+        )
+        .orderBy(asc(post.createdAt))
+        .limit(20);
+
+      // Group by comment ID to handle multiple rows from joins
+      const commentsMap = new Map();
+
+      for (const row of newComments) {
+        if (!commentsMap.has(row.id)) {
+          commentsMap.set(row.id, {
+            id: row.id,
+            content: row.content,
+            mediaUrls: row.mediaUrls,
+            replyToId: row.replyToId,
+            replyCount: row.replyCount,
+            likeCount: row.likeCount,
+            retweetCount: row.retweetCount,
+            createdAt: row.createdAt,
+            createdById: row.createdById,
+            createdBy: {
+              id: row.createdById,
+              name: row.userName,
+              image: row.userImage,
+            },
+            userInteractions: {
+              liked: !!row.userLiked,
+              retweeted: !!row.userRetweeted,
+            },
+          });
+        }
+      }
+
+      return {
+        items: Array.from(commentsMap.values()),
       };
     }),
 
@@ -444,6 +552,105 @@ export const postRouter = createTRPCRouter({
 
     return post ?? null;
   }),
+
+  getNewPosts: publicProcedure
+    .input(
+      z.object({
+        since: z.number(), // timestamp since last poll
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { since } = input;
+      const sinceDate = new Date(since);
+
+      // Build the base query
+      let query = ctx.db
+        .select({
+          id: post.id,
+          content: post.content,
+          mediaUrls: post.mediaUrls,
+          replyToId: post.replyToId,
+          replyCount: post.replyCount,
+          likeCount: post.likeCount,
+          retweetCount: post.retweetCount,
+          createdAt: post.createdAt,
+          createdById: post.createdById,
+          // User data
+          userName: user.name,
+          userImage: user.image,
+          // User interactions (will be null if not authenticated or no interaction)
+          userLiked: postLike.postId,
+          userRetweeted: postRetweet.originalPostId,
+        })
+        .from(post)
+        .leftJoin(user, eq(user.id, post.createdById));
+
+      // Add conditional joins only if user is authenticated
+      if (ctx.session?.user?.id) {
+        query = query
+          .leftJoin(
+            postLike,
+            and(
+              eq(postLike.postId, post.id),
+              eq(postLike.userId, ctx.session.user.id),
+            ),
+          )
+          .leftJoin(
+            postRetweet,
+            and(
+              eq(postRetweet.originalPostId, post.id),
+              eq(postRetweet.userId, ctx.session.user.id),
+            ),
+          );
+      } else {
+        // For unauthenticated users, still join but with conditions that won't match
+        query = query
+          .leftJoin(postLike, sql`1 = 0`)
+          .leftJoin(postRetweet, sql`1 = 0`);
+      }
+
+      const newPosts = await query
+        .where(
+          and(
+            isNull(post.replyToId),
+            sql`${post.createdAt} > ${sinceDate.getTime() / 1000}`,
+          ),
+        )
+        .orderBy(desc(post.createdAt))
+        .limit(50);
+
+      // Group by post ID to handle multiple rows from joins
+      const postsMap = new Map();
+
+      for (const row of newPosts) {
+        if (!postsMap.has(row.id)) {
+          postsMap.set(row.id, {
+            id: row.id,
+            content: row.content,
+            mediaUrls: row.mediaUrls,
+            replyToId: row.replyToId,
+            replyCount: row.replyCount,
+            likeCount: row.likeCount,
+            retweetCount: row.retweetCount,
+            createdAt: row.createdAt,
+            createdById: row.createdById,
+            createdBy: {
+              id: row.createdById,
+              name: row.userName,
+              image: row.userImage,
+            },
+            userInteractions: {
+              liked: !!row.userLiked,
+              retweeted: !!row.userRetweeted,
+            },
+          });
+        }
+      }
+
+      return {
+        items: Array.from(postsMap.values()),
+      };
+    }),
 
   getSecretMessage: protectedProcedure.query(() => {
     return "you can now see this secret message!";
